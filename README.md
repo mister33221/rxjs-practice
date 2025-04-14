@@ -5,7 +5,9 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 
-本專案整理並實作了 RxJS 在 Angular 中的常用操作符，並依功能分類為 7 個練習分頁，每頁皆提供互動按鈕與輸出結果區塊，幫助你動手操作並理解觀察行為差異。
+本專案整理並實作了 RxJS 在 Angular 中的常用操作符，並依功能分類為 7 個練習分頁，每頁皆提供互動按鈕與輸出結果區塊。
+
+![alt text](image.png)
 
 ---
 
