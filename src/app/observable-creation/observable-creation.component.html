@@ -1,0 +1,36 @@
+<div class="p-4 space-y-4">
+  <h2 class="text-xl font-bold">🔹 1. 建立 Observable 的方法 - RxJS 練習</h2>
+
+  <div class="grid grid-cols-2 gap-2">
+    <button class="btn btn-blue" (click)="demoOf()">of()</button>
+    <button class="btn btn-blue" (click)="demoFrom()">from()</button>
+    <button class="btn btn-blue" (click)="demoInterval()">interval()</button>
+    <button class="btn btn-blue" (click)="demoTimer()">timer()</button>
+    <button class="btn btn-blue" (click)="demoThrowError()">
+      throwError()
+    </button>
+    <button class="btn btn-blue" (click)="demoEmptyNever()">
+      EMPTY / NEVER
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+    <!-- 程式碼區塊 -->
+    <div>
+      <h3 class="font-semibold mb-2">程式碼與註解：</h3>
+      <pre class="bg-slate-800 text-white text-sm rounded p-4 whitespace-pre-wrap">
+  {{ currentCode }}
+      </pre>
+    </div>
+
+    <!-- 輸出區塊（您已完成） -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold">輸出結果：</h3>
+        <button class="btn btn-gray" (click)="clear()">清除</button>
+      </div>
+      <div class="bg-gray-100 p-2 rounded shadow-sm max-h-64 overflow-auto">
+        <div *ngFor="let log of outputLogs">{{ log }}</div>
+      </div>
+    </div>
+</div>

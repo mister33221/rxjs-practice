@@ -1,0 +1,33 @@
+<div class="p-4 space-y-4">
+  <h2 class="text-xl font-bold">🔹 6. 工具類 - RxJS Utility Operators</h2>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+    <button class="btn btn-blue" (click)="demoTap()">tap()</button>
+    <button class="btn btn-blue" (click)="demoFinalize()">finalize()</button>
+    <button class="btn btn-blue" (click)="demoDelay()">delay()</button>
+    <button class="btn btn-blue" (click)="demoDebounceTime()">debounceTime()</button>
+    <button class="btn btn-blue" (click)="demoAuditTime()">auditTime()</button>
+    <button class="btn btn-blue" (click)="demoTimeout()">timeout()</button>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- 左側：程式碼與註解 -->
+    <div>
+      <h3 class="font-semibold mb-2">程式碼與註解：</h3>
+      <pre class="bg-slate-800 text-white text-sm rounded p-4 whitespace-pre-wrap">
+{{ currentCode }}
+      </pre>
+    </div>
+
+    <!-- 右側：輸出區塊 -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold">輸出結果：</h3>
+        <button class="btn btn-gray" (click)="clear()">清除</button>
+      </div>
+      <div class="bg-gray-100 p-2 rounded shadow-sm max-h-64 overflow-auto">
+        <div *ngFor="let log of outputLogs">{{ log }}</div>
+      </div>
+    </div>
+  </div>
+</div>
