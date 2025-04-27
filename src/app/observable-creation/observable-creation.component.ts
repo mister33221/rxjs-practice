@@ -1,10 +1,19 @@
 import { Component } from '@angular/core';
-import { EMPTY, from, interval, NEVER, of, Subscription, throwError, timer } from 'rxjs';
+import {
+  EMPTY,
+  from,
+  interval,
+  NEVER,
+  of,
+  Subscription,
+  throwError,
+  timer,
+} from 'rxjs';
 
 @Component({
   selector: 'app-observable-creation',
   templateUrl: './observable-creation.component.html',
-  styleUrls: ['./observable-creation.component.scss']
+  styleUrls: ['./observable-creation.component.scss'],
 })
 export class ObservableCreationComponent {
   outputLogs: string[] = [];
@@ -31,7 +40,7 @@ of(1, 2, 3).subscribe({
 });`;
 
     of(1, 2, 3).subscribe({
-      next: val => this.addLog(`[of] value: ${val}`),
+      next: (val) => this.addLog(`[of] value: ${val}`),
       complete: () => this.addLog('[of] completed'),
     });
   }
@@ -45,9 +54,15 @@ from(fakeApi).subscribe({
   complete: () => console.log('completed')
 });`;
 
+    // form 與 of 的差異
+    // 使用 from()
+    from([1, 2, 3]).subscribe(console.log); // 輸出: 1, 2, 3
+    // 使用 of()
+    of([1, 2, 3]).subscribe(console.log); // 輸出: [1, 2, 3]
+
     const fakeApi = Promise.resolve({ id: 1, name: 'RxJS' });
     from(fakeApi).subscribe({
-      next: val => this.addLog(`[from] resolved: ${JSON.stringify(val)}`),
+      next: (val) => this.addLog(`[from] resolved: ${JSON.stringify(val)}`),
       complete: () => this.addLog('[from] completed'),
     });
   }
@@ -57,7 +72,7 @@ from(fakeApi).subscribe({
     this.currentCode = `// interval(): 每隔指定時間發出遞增數字
 interval(1000).subscribe(val => console.log(val));`;
 
-    this.intervalSub = interval(1000).subscribe(val => {
+    this.intervalSub = interval(1000).subscribe((val) => {
       this.addLog(`[interval] tick: ${val}`);
       if (val >= 2) this.intervalSub?.unsubscribe();
     });
@@ -81,7 +96,7 @@ throwError(() => new Error('錯誤')).subscribe({
 
     throwError(() => new Error('發生錯誤')).subscribe({
       next: () => {},
-      error: err => this.addLog(`[throwError] error: ${err.message}`),
+      error: (err) => this.addLog(`[throwError] error: ${err.message}`),
     });
   }
 
