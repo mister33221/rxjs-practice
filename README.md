@@ -109,10 +109,10 @@ from<T>(input: ObservableInput<T>): Observable<T>
 
 #### 跟 `of()` 的差異
 ```javascript
-// 使用 from()
-from([1, 2, 3]).subscribe(console.log); // 輸出: 1, 2, 3
 // 使用 of()
-of([1, 2, 3]).subscribe(console.log); // 輸出: [1, 2, 3]
+of([1, 2, 3]).subscribe(console.log); // 輸出: [1, 2, 3]（整個陣列作為單一值）
+// 使用 from()
+from([1, 2, 3]).subscribe(console.log); // 輸出: 1, 2, 3（逐個發出）
 ```
 
 ## 1.3 `interval()`
@@ -211,14 +211,8 @@ map<T, R>(project: (value: T, index: number) => R, thisArg?: any): Observable<R>
 - 可以鏈式調用：
   - `map()` 可以與其他操作符鏈式調用，例如 `filter()`、`mergeMap()` 等等。
 #### 使用場景
-- 數據轉換
-  - 將 API 回應的資料轉換為所需的格式。
-- 數據計算
-  - 對數字進行計算，例如加法、乘法等。
-- 字串處理
-  - 對字串進行處理，例如轉換大小寫、去除空格等。
-- 數據格式化
-  - 對日期、時間等進行格式化處理。
+- 當需要對 observable 發出的每個值進行轉換時，可以使用 map() 將其轉為新格式，例如轉為畫面需要的資料模型。
+- 常用於簡單資料轉換，例如從後端回傳物件中擷取欄位。
 #### 例子
 
 > 這裡也說明一下 pipe() 的用法    
@@ -249,14 +243,9 @@ switchMap<T, R>(project: (value: T, index: number) => ObservableInput<R>, thisAr
 - 只保留最新的值：
   - `switchMap()` 只會發出最新的值，前面的值會被忽略。
 #### 使用場景
-- 取消前一個請求：
-  - 當需要發送多個 HTTP 請求時，switchMap() 可以確保只保留最新的請求結果。
-- 處理快速變化的事件：
-  - 適合用於處理快速變化的使用者輸入（如搜尋框）或其他高頻事件。
-- 重啟內部流程：
-  - 每次觸發事件時，重新啟動內部的資料流。
-- 避免競態條件：
-  - 在多個資料流競爭時，確保只處理最新的資料流。
+- 當需要依據使用者的最新操作（如搜尋輸入）取消前一次請求時，適合使用 switchMap()。
+- 當每次事件觸發都應該只保留最新結果，例如 autocomplete 搜尋建議。
+- 可避免過時請求結果覆蓋最新內容。
 
 ### 2.3 `mergeMap()`
 ```typescript
@@ -280,9 +269,9 @@ mergeMap<T, R>(project: (value: T, index: number) => ObservableInput<R>, thisArg
 - 合併多個 observable 的值：
   - `mergeMap()` 可以將多個 observable 的值合併成一個新的 observable，這樣可以更方便地處理多個資料流。
 #### 使用場景
-- 當需要同時處理多個資料流時，可以使用 `mergeMap()` 來平行訂閱這些 observable。
-- 當需要將多個 observable 的值合併成一個新的 observable 時，可以使用 `mergeMap()` 來實現。
-- 當需要對多個 observable 的結果進行合併處理時，可以使用 `mergeMap()` 來簡化程式碼。
+- 當需要同時處理多個資料流時，可以使用 mergeMap() 來平行訂閱這些 observable。
+- 當需要將多個 observable 的值合併成一個新的 observable 時，可以使用 mergeMap() 來實現。
+- 當需要對多個 observable 的結果進行合併處理時，可以使用 mergeMap() 來簡化程式碼。
 
 ## 2.4 `concatMap()`
 ```typescript
@@ -303,7 +292,9 @@ concatMap<T, R>(project: (value: T, index: number) => ObservableInput<R>, thisAr
 - 不會平行訂閱：
   - `concatMap()` 不會平行訂閱多個 observable，而是依序處理每個 observable。
 ### 使用場景
-- 當需要按順序處理多個 observable 時，可以使用 `concatMap()` 來確保每個 observable 的值按順序發出。
+- 當需要保證每個 observable 順序執行時，可以使用 concatMap()。
+- 適合依序儲存多筆資料、寫入資料庫等場景。
+- 可避免因非同步導致的資料錯亂問題。
 ### 範例
 - 這裡寫一個範例，我們假設的狀況
   - 總共有三支API
@@ -349,7 +340,9 @@ exhaustMap<T, R>(project: (value: T, index: number) => ObservableInput<R>, thisA
   - 當內部的 observable 還在執行時，`exhaustMap()` 會忽略新的 observable，只處理當前的 observable。
 - 當內部的 observable 完成後，才會訂閱新的 observable。
 #### 使用場景
-- 當需要忽略快速變化的事件時，可以使用 `exhaustMap()` 來確保只處理當前的事件。
+- 當不希望在前一個 observable 完成前處理新事件時，可使用 exhaustMap()。
+- 常見於防止使用者連續點擊提交按鈕，避免重複請求。
+- 只在空閒時接收新事件，其他事件會被忽略。
 #### 範例
 - 情境是我們有一顆按鈕可以觸發API請求，而我們假設這支API請求需要花費 3 秒鐘的時間來完成
   - 當我在這 3 秒鐘內不斷點擊按鈕的時候，照一般的情況下，會發出多個請求
@@ -368,6 +361,7 @@ exhaustMap<T, R>(project: (value: T, index: number) => ObservableInput<R>, thisA
   }
 
   // 模擬 API 請求
+  // 即使不斷點擊，直到前一個 API 結束，才會接受新點擊
   fakeApiCall() {
     const timestamp = new Date().toLocaleTimeString();
     return of(`API 回應於 ${timestamp}`).pipe(delay(3000)); // 模擬 3 秒延遲
@@ -385,7 +379,206 @@ exhaustMap<T, R>(project: (value: T, index: number) => ObservableInput<R>, thisA
 | `first()` / `last()` | 只取第一個 / 最後一個符合條件的值。 |
 | `distinctUntilChanged()` | 避免連續重複的值發出。 |
 
-### 
+### 3.1 `filter()`
+```typescript
+filter<T>(predicate: (value: T, index: number) => boolean, thisArg?: any): Observable<T>
+```
+#### 參數
+- `predicate`：過濾函式，接收每個值和索引，並返回布林值。
+- `thisArg`：可選的上下文物件，用於指定函式的 this 值。
+- `T`：輸入值的類型。
+- `Observable<T>`：返回一個 Observable 物件，當訂閱時會對每個輸入值應用過濾函式，並返回符合條件的值。
+- `number`：表示輸入值的索引。
+#### 特性
+- 逐一處理每個值：
+  - `filter()` 會對 Observable 發出的每個值應用過濾函式，並返回符合條件的值。
+- 不會改變原始資料流結構：
+  - `filter()` 不會改變原始資料流的結構，只會對每個值進行過濾。
+- 同步執行：
+  - `filter()` 是同步的，這意味著當訂閱者訂閱時，所有的值會立即發出。
+- 適合用於簡單的過濾操作，例如數字範圍、字串匹配等。
+- 可以鏈式調用：
+  - `filter()` 可以與其他操作符鏈式調用，例如 `map()`、`mergeMap()` 等等。
+#### 使用場景
+- 當需要根據條件過濾不需要的值時，可以使用 filter()。
+- 適合過濾掉不符合條件的輸入資料，例如只保留大於某個數值的數據。
+#### 例子
+```typescript
+import { of } from 'rxjs';
+import { filter } from 'rxjs/operators';
+const numbers$ = of(1, 2, 3, 4, 5);
+const evenNumbers$ = numbers$.pipe(
+  filter(value => value % 2 === 0)
+);
+evenNumbers$.subscribe(value => console.log(value)); // 輸出: 2, 4
+```
+
+### 3.2 `take()`
+```typescript
+take<T>(count: number): Observable<T>
+```
+#### 參數
+- `count`：要取的值的數量。
+- `number`：表示要取的值的數量。
+- `Observable<T>`：返回一個 Observable 物件，當訂閱時會發出前 count 個值，然後完成。
+- `T`：輸入值的類型。
+#### 特性
+- 只取前 n 個值：
+  - `take()` 會對 Observable 發出的前 count 個值進行訂閱，然後完成。
+- 不會改變原始資料流結構：
+  - `take()` 不會改變原始資料流的結構，只會對前 count 個值進行訂閱。
+- 同步執行：
+  - `take()` 是同步的，這意味著當訂閱者訂閱時，所有的值會立即發出。
+- 適合用於簡單的取值操作，例如只需要前 n 個值。
+- 可以鏈式調用：
+  - `take()` 可以與其他操作符鏈式調用，例如 `filter()`、`map()` 等等。
+#### 使用場景
+- 當只想接收前 n 個資料項目時，可以使用 take(n)。
+- 適用於只需初始幾個值、或限制觀察次數的情境。
+#### 例子
+```typescript
+import { of } from 'rxjs';
+import { take } from 'rxjs/operators';
+const numbers$ = of(1, 2, 3, 4, 5);
+const firstThree$ = numbers$.pipe(
+  take(3)
+);
+firstThree$.subscribe(value => console.log(value)); // 輸出: 1, 2, 3
+```
+### 3.3 `takeUntil()`
+```typescript
+takeUntil<T>(notifier: ObservableInput<any>): Observable<T>
+```
+#### 參數
+- `notifier`：當這個 observable 發出值時，停止訂閱。
+- `ObservableInput<any>`：表示要停止訂閱的 observable。
+- `Observable<T>`：返回一個 Observable 物件，當訂閱時會發出值，直到 notifier 發出值為止。
+- `T`：輸入值的類型。
+#### 特性
+- 直到另一個 observable 發出值為止：
+  - `takeUntil()` 會對 Observable 發出的值進行訂閱，直到 notifier 發出值為止。
+- 不會改變原始資料流結構：
+  - `takeUntil()` 不會改變原始資料流的結構，只會對前 count 個值進行訂閱。
+- 同步執行：
+  - `takeUntil()` 是同步的，這意味著當訂閱者訂閱時，所有的值會立即發出。
+- 適合用於簡單的取值操作，例如只需要前 n 個值。
+- 可以鏈式調用：
+  - `takeUntil()` 可以與其他操作符鏈式調用，例如 `filter()`、`map()` 等等。
+#### 使用場景
+- 當需要在某個條件或事件發生時自動停止訂閱時，可以使用 takeUntil()。
+- 適合用於元件銷毀時停止資料流，例如 componentDestroyed$ 的常見模式。
+#### 例子
+```typescript
+import { interval, timer } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+const source$ = interval(500); // 每 500ms 發一個值
+const notifier$ = timer(2000); // 2 秒後停止
+
+source$.pipe(
+  takeUntil(notifier$)
+).subscribe(val => console.log(val)); // 輸出: 0, 1, 2, 3
+```
+### 3.4 `first()`
+```typescript
+first<T>(predicate?: (value: T, index: number) => boolean, defaultValue?: T): Observable<T>
+```
+#### 參數
+- `predicate`：可選的過濾函式，接收每個值和索引，並返回布林值。
+- `defaultValue`：可選的預設值，當沒有符合條件的值時返回。
+- `T`：輸入值的類型。
+- `Observable<T>`：返回一個 Observable 物件，當訂閱時會發出第一個符合條件的值，然後完成。
+- `number`：表示輸入值的索引。
+
+#### 特性
+- 只取第一個符合條件的值：
+  - `first()` 會對 Observable 發出的每個值應用過濾函式，並返回第一個符合條件的值。
+- 如果沒有符合條件的值，則返回預設值。
+- 不會改變原始資料流結構：
+  - `first()` 不會改變原始資料流的結構，只會對第一個符合條件的值進行訂閱。
+- 同步執行：
+  - `first()` 是同步的，這意味著當訂閱者訂閱時，所有的值會立即發出。
+- 適合用於簡單的取值操作，例如只需要第一個符合條件的值。
+- 可以鏈式調用：
+  - `first()` 可以與其他操作符鏈式調用，例如 `filter()`、`map()` 等等。
+
+#### 例子
+```typescript
+import { of } from 'rxjs';
+import { first } from 'rxjs/operators';
+const numbers$ = of(1, 2, 3, 4, 5);
+const firstEven$ = numbers$.pipe(
+  first(value => value % 2 === 0)
+);
+firstEven$.subscribe(value => console.log(value)); // 輸出: 2
+```
+### 3.5 `last()`
+```typescript
+last<T>(predicate?: (value: T, index: number) => boolean, defaultValue?: T): Observable<T>
+```
+#### 參數
+- `predicate`：可選的過濾函式，接收每個值和索引，並返回布林值。
+- `defaultValue`：可選的預設值，當沒有符合條件的值時返回。
+- `T`：輸入值的類型。
+- `Observable<T>`：返回一個 Observable 物件，當訂閱時會發出最後一個符合條件的值，然後完成。
+- `number`：表示輸入值的索引。
+#### 特性
+- 只取最後一個符合條件的值：
+  - `last()` 會對 Observable 發出的每個值應用過濾函式，並返回最後一個符合條件的值。
+- 如果沒有符合條件的值，則返回預設值。
+- 不會改變原始資料流結構：
+  - `last()` 不會改變原始資料流的結構，只會對最後一個符合條件的值進行訂閱。
+- 同步執行：
+  - `last()` 是同步的，這意味著當訂閱者訂閱時，所有的值會立即發出。
+- 適合用於簡單的取值操作，例如只需要最後一個符合條件的值。
+- 可以鏈式調用：
+  - `last()` 可以與其他操作符鏈式調用，例如 `filter()`、`map()` 等等。
+#### 使用場景
+- 當只需要 observable 的第一個或最後一個值時，可以使用 first() 或 last()。
+- first() 常用於表單驗證流程中只取第一個錯誤，last() 則可用於收集過濾後的最終值。
+#### 例子
+```typescript
+import { of } from 'rxjs';
+import { last } from 'rxjs/operators';
+const numbers$ = of(1, 2, 3, 4, 5);
+const lastEven$ = numbers$.pipe(
+  last(value => value % 2 === 0)
+);
+lastEven$.subscribe(value => console.log(value)); // 輸出: 4
+```
+### 3.6 `distinctUntilChanged()`
+```typescript
+distinctUntilChanged<T>(compare?: (x: T, y: T) => boolean): Observable<T>
+```
+#### 參數
+- `compare`：可選的比較函式，接收前一個值和當前值，並返回布林值。
+- `T`：輸入值的類型。
+- `Observable<T>`：返回一個 Observable 物件，當訂閱時會發出不重複的值。
+- `boolean`：表示前一個值和當前值是否相等。
+#### 特性
+- 過濾連續重複的值：
+  - `distinctUntilChanged()` 會對 Observable 發出的每個值進行比較，並返回不重複的值。
+- 如果前一個值和當前值相等，則不會發出當前值。
+- 不會改變原始資料流結構：
+  - `distinctUntilChanged()` 不會改變原始資料流的結構，只會對不重複的值進行訂閱。
+- 同步執行：
+  - `distinctUntilChanged()` 是同步的，這意味著當訂閱者訂閱時，所有的值會立即發出。
+- 適合用於簡單的過濾操作，例如只需要不重複的值。
+- 可以鏈式調用：
+  - `distinctUntilChanged()` 可以與其他操作符鏈式調用，例如 `filter()`、`map()` 等等。
+#### 使用場景
+- 當需要避免連續重複的值被處理時，可以使用 distinctUntilChanged()。
+- 適用於搜尋欄位輸入防抖（debounce）後避免同樣輸入重複觸發請求。
+```typescript
+import { of } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
+const numbers$ = of(1, 2, 2, 3, 4, 4, 5);
+const distinctNumbers$ = numbers$.pipe(
+  distinctUntilChanged()
+);
+distinctNumbers$.subscribe(value => console.log(value)); // 輸出: 1, 2, 3, 4, 5
+```
+
 
 ---
 
