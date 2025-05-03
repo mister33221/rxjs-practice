@@ -638,11 +638,6 @@ distinctNumbers$.subscribe(value => console.log(value)); // 輸出: 1, 2, 3, 4, 
 
 ---
 
-## ✅ 建議特別熟練的操作符
-- `switchMap`, `tap`, `catchError`, `combineLatest`, `takeUntil`, `BehaviorSubject`
-
----
-
 ## 📎 補充學習建議
 - 了解 Observable 與 Promise 的差異。
 - 學習 RxJS 與 async/await 的整合方式（搭配 `firstValueFrom()`）。
